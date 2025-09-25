@@ -1,44 +1,38 @@
-name: Build and deploy Flutter Web App to Azure Web App
+name: Azure Static Web Apps CI/CD
 
 on:
   push:
     branches:
-      - flutterflow
-  workflow_dispatch:
+      - flutterflow # O la rama donde hagas tus pushes
 
 jobs:
-  build_and_deploy:
+  build_and_deploy_job:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # ¡AÑADE ESTA LÍNEA!
-      contents: read
+    name: Build and Deploy Job
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
 
-      - name: Set up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.4'
+          flutter-version: '3.32.4' # Usa la versión de Flutter de tu proyecto
           channel: 'stable'
 
-      - name: Get Flutter dependencies
-        run: flutter pub get
-
       - name: Build Flutter web app
-        run: flutter build web --release
+        run: |
+          flutter config --enable-web
+          flutter pub get
+          flutter build web --release
 
-      - name: Login to Azure
-        uses: azure/login@v2
+      - name: Deploy to Azure Static Web App
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_44965F1672294D609C9A93F390C2F4FA }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D857756EFC8846F78C450AFA93C23BB1 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6414FC64AF43499DB1A9AEB3FF956DA5 }}
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'pexel-flutterflow-app'
-          slot-name: 'Production'
-          package: './build/web'
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_PEBBLE_037E8B010 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/" 
+          output_location: "build/web"
