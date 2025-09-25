@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,32 +18,14 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.4' # Reemplaza '3.x.x' con la versión específica de Flutter
+          flutter-version: '3.22.4'
           channel: 'stable'
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Build Flutter web
+      - name: Build Flutter web app
         run: flutter build web --release
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-web-app
-          path: build/web
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: flutter-web-app
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -52,11 +34,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D857756EFC8846F78C450AFA93C23BB1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_6414FC64AF43499DB1A9AEB3FF956DA5 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'pexel-flutterflow-app'
           slot-name: 'Production'
-          package: .
-
+          package: './build/web'
