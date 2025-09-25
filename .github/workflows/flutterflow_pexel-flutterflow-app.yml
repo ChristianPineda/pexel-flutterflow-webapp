@@ -10,6 +10,7 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write # ¡AÑADE ESTA LÍNEA!
       contents: read
     steps:
       - name: Checkout repository
@@ -41,4 +42,3 @@ jobs:
           app-name: 'pexel-flutterflow-app'
           slot-name: 'Production'
           package: './build/web'
-
