@@ -18,7 +18,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x.x' # Asegúrate de que esta sea la versión de Flutter de tu proyecto
+          flutter-version: '3.22.2' # Reemplaza '3.x.x' con la versión específica de Flutter
+          channel: 'stable'
 
       - name: Get dependencies
         run: flutter pub get
@@ -30,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: flutter-web-app
-          path: build/web # **Apunta al directorio de salida de la compilación de Flutter**
+          path: build/web
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,7 +43,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: flutter-web-app # **Usa el nombre del artefacto que subiste en el paso anterior**
+          name: flutter-web-app
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -57,4 +58,4 @@ jobs:
         with:
           app-name: 'pexel-flutterflow-app'
           slot-name: 'Production'
-          package: . # **El punto (`.`) es correcto aquí, ya que el artefacto descargado es el contenido del directorio `build/web`**
+          package: .
